@@ -21,7 +21,10 @@ impl<'iter, T> Iterator for MyIterMut<'iter, T> {
 
     #[allow(clippy::needless_lifetimes)]
     fn next<'next>(&'next mut self) -> Option<Self::Item> {
+        // Here is the trick to fix the lifetime issue without unsafe.
+        // slice is a &mut &mut [T]
         let slice = &mut self.slice;
+        // So we can use std::mem::(take | replace | switch) to get a owned &mut [T]
         let slice2 = std::mem::take(slice);
         let (element, tail) = slice2.split_first_mut()?;
         self.slice = tail;
